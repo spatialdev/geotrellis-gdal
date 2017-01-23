@@ -1,14 +1,18 @@
 package geotrellis.gdal
 
+import geotrellis.gdal.io.hadoop.GdalInputFormat.{GdalFileInfo, GdalRasterInfo}
+import geotrellis.gdal.io.hadoop._
 import geotrellis.proj4._
 import geotrellis.raster._
 import geotrellis.raster.io.geotiff._
+import org.apache.spark.rdd.RDD
 import org.scalatest.{Matchers, _}
 
 class GdalReaderSpec extends FunSpec
   with Matchers
   with OnlyIfGdalInstalled
   with OnlyIfJpeg2000PluginInstalled
+  with SparkFixtures
 {
 
   val path = "src/test/resources/data/slope.tif"
@@ -67,6 +71,21 @@ class GdalReaderSpec extends FunSpec
           extent.cols should be (lengthExpected)
           extent.rows should be (lengthExpected)
           tile.cellType shouldBe a [TypeExpected]
+        }
+
+        it("should load a JPEG2000 into an RDD") {
+          withSpark { sc =>
+            val tileRdd: RDD[(GdalRasterInfo, Tile)] =
+              sc.gdalRDD(new org.apache.hadoop.fs.Path(jpeg2000Path))
+
+            val first = tileRdd.first()
+            val fileInfo: GdalFileInfo = first._1.file
+            val tile: Tile = first._2
+
+            fileInfo.rasterExtent.cols should be (lengthExpected)
+            fileInfo.rasterExtent.rows should be (lengthExpected)
+            tile.cellType shouldBe a [TypeExpected]
+          }
         }
       }
     }
