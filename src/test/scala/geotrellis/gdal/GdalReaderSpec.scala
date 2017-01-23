@@ -1,12 +1,16 @@
 package geotrellis.gdal
 
+import geotrellis.proj4._
 import geotrellis.raster._
 import geotrellis.raster.io.geotiff._
-import geotrellis.proj4._
+import org.scalatest.{Matchers, _}
 
-import org.scalatest._
+class GdalReaderSpec extends FunSpec
+  with Matchers
+  with OnlyIfGdalInstalled
+  with OnlyIfJpeg2000PluginInstalled
+{
 
-class GdalReaderSpec extends FunSpec with Matchers with OnlyIfGdalInstalled {
   val path = "src/test/resources/data/slope.tif"
 
   describe("reading a GeoTiff") {
@@ -44,6 +48,26 @@ class GdalReaderSpec extends FunSpec with Matchers with OnlyIfGdalInstalled {
       it("should read CRS from file") {
         val rasterDataSet = Gdal.open("src/test/resources/data/geotiff-test-files/all-ones.tif")
         rasterDataSet.crs should equal(Some(LatLng))
+      }
+    }
+  }
+
+  describe("reading a JPEG2000") {
+    ifGdalInstalled {
+      ifJpeg2000PluginInstalled {
+
+        val lengthExpected = 100
+        type TypeExpected = IntCells
+        val jpeg2000Path = "src/test/resources/data/jpeg2000-test-files/testJpeg2000.jp2"
+
+        it("should read a JPEG2000 from a file") {
+
+          val (tile: Tile, extent: RasterExtent) = GdalReader.read(jpeg2000Path)
+
+          extent.cols should be (lengthExpected)
+          extent.rows should be (lengthExpected)
+          tile.cellType shouldBe a [TypeExpected]
+        }
       }
     }
   }
