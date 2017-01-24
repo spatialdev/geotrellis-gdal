@@ -11,7 +11,6 @@ import org.scalatest.{Matchers, _}
 class GdalReaderSpec extends FunSpec
   with Matchers
   with OnlyIfGdalInstalled
-  with OnlyIfJpeg2000PluginInstalled
   with TestEnvironment
 {
 
@@ -57,34 +56,31 @@ class GdalReaderSpec extends FunSpec
   }
 
   describe("reading a JPEG2000") {
-    ifGdalInstalled {
-      ifJpeg2000PluginInstalled {
+    ifGdalWithJpeg2000Installed {
+      val lengthExpected = 100
+      type TypeExpected = IntCells
+      val jpeg2000Path = "src/test/resources/data/jpeg2000-test-files/testJpeg2000.jp2"
 
-        val lengthExpected = 100
-        type TypeExpected = IntCells
-        val jpeg2000Path = "src/test/resources/data/jpeg2000-test-files/testJpeg2000.jp2"
+      it("should read a JPEG2000 from a file") {
 
-        it("should read a JPEG2000 from a file") {
+        val (tile: Tile, extent: RasterExtent) = GdalReader.read(jpeg2000Path)
 
-          val (tile: Tile, extent: RasterExtent) = GdalReader.read(jpeg2000Path)
+        extent.cols should be (lengthExpected)
+        extent.rows should be (lengthExpected)
+        tile.cellType shouldBe a [TypeExpected]
+      }
 
-          extent.cols should be (lengthExpected)
-          extent.rows should be (lengthExpected)
-          tile.cellType shouldBe a [TypeExpected]
-        }
+      it("should load a JPEG2000 into an RDD") {
+        val tileRdd: RDD[(GdalRasterInfo, Tile)] =
+          sc.gdalRDD(new org.apache.hadoop.fs.Path(jpeg2000Path))
 
-        it("should load a JPEG2000 into an RDD") {
-          val tileRdd: RDD[(GdalRasterInfo, Tile)] =
-            sc.gdalRDD(new org.apache.hadoop.fs.Path(jpeg2000Path))
+        val first = tileRdd.first()
+        val fileInfo: GdalFileInfo = first._1.file
+        val tile: Tile = first._2
 
-          val first = tileRdd.first()
-          val fileInfo: GdalFileInfo = first._1.file
-          val tile: Tile = first._2
-
-          fileInfo.rasterExtent.cols should be (lengthExpected)
-          fileInfo.rasterExtent.rows should be (lengthExpected)
-          tile.cellType shouldBe a [TypeExpected]
-        }
+        fileInfo.rasterExtent.cols should be (lengthExpected)
+        fileInfo.rasterExtent.rows should be (lengthExpected)
+        tile.cellType shouldBe a [TypeExpected]
       }
     }
   }
