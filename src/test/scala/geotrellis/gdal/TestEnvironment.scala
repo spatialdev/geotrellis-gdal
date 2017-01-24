@@ -16,19 +16,14 @@
 
 package geotrellis.gdal
 
+import java.io.File
+
 import geotrellis.spark.io.hadoop.HdfsUtils
 import geotrellis.spark.util.SparkUtils
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.serializer.{ KryoRegistrator => SparkKryoRegistrator }
-
-import org.apache.hadoop.fs.FileSystem
-import org.apache.hadoop.fs.FileUtil
-import org.apache.hadoop.fs.Path
 import org.apache.hadoop.conf.Configuration
-import org.scalatest._
-import org.scalatest.BeforeAndAfterAll
-
-import java.io.File
+import org.apache.hadoop.fs.{FileSystem, FileUtil, Path}
+import org.apache.spark.{SparkConf, SparkContext}
+import org.scalatest.{BeforeAndAfterAll, _}
 
 object TestEnvironment {
   def getLocalFS(conf: Configuration): FileSystem = new Path(System.getProperty("java.io.tmpdir")).getFileSystem(conf)
@@ -45,7 +40,7 @@ object TestEnvironment {
  * It uses commons-io in at least one case (recursive directory deletion)
  */
 trait TestEnvironment extends BeforeAndAfterAll { self: Suite =>
-  var _sc: SparkContext = {
+  lazy val _sc: SparkContext = {
     System.setProperty("spark.driver.port", "0")
     System.setProperty("spark.hostPort", "0")
     System.setProperty("spark.ui.enabled", "false")

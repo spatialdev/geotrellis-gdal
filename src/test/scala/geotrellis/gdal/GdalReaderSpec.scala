@@ -12,7 +12,7 @@ class GdalReaderSpec extends FunSpec
   with Matchers
   with OnlyIfGdalInstalled
   with OnlyIfJpeg2000PluginInstalled
-  with SparkFixtures
+  with TestEnvironment
 {
 
   val path = "src/test/resources/data/slope.tif"
@@ -74,18 +74,16 @@ class GdalReaderSpec extends FunSpec
         }
 
         it("should load a JPEG2000 into an RDD") {
-          withSpark { sc =>
-            val tileRdd: RDD[(GdalRasterInfo, Tile)] =
-              sc.gdalRDD(new org.apache.hadoop.fs.Path(jpeg2000Path))
+          val tileRdd: RDD[(GdalRasterInfo, Tile)] =
+            sc.gdalRDD(new org.apache.hadoop.fs.Path(jpeg2000Path))
 
-            val first = tileRdd.first()
-            val fileInfo: GdalFileInfo = first._1.file
-            val tile: Tile = first._2
+          val first = tileRdd.first()
+          val fileInfo: GdalFileInfo = first._1.file
+          val tile: Tile = first._2
 
-            fileInfo.rasterExtent.cols should be (lengthExpected)
-            fileInfo.rasterExtent.rows should be (lengthExpected)
-            tile.cellType shouldBe a [TypeExpected]
-          }
+          fileInfo.rasterExtent.cols should be (lengthExpected)
+          fileInfo.rasterExtent.rows should be (lengthExpected)
+          tile.cellType shouldBe a [TypeExpected]
         }
       }
     }
