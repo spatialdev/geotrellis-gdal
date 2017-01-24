@@ -55,7 +55,7 @@ libraryDependencies ++= Seq(
   "com.github.scopt"            %% "scopt"                % "3.5.0"
 )
 
-fork in test := false
+fork in Test := true
 parallelExecution in Test := false
 
-javaOptions += s"-Djava.library.path=${Environment.javaLibraryPath}"
+javaOptions in Test += "-Djava.library.path=\"" + Environment.javaLibraryPath + "\""
