@@ -45,7 +45,7 @@ pomExtra := (
 
 libraryDependencies ++= Seq(
   "org.scalatest"               %%  "scalatest"           % "2.2.0"       % "test",
-  "org.gdal"                    %   "gdal"                % "2.1.2",
+  "org.gdal"                    %   "gdal"                % "2.1.0",
   "org.locationtech.geotrellis" %% "geotrellis-raster"    % "1.0.0",
   "org.locationtech.geotrellis" %% "geotrellis-spark"     % "1.0.0",
   "org.locationtech.geotrellis" %% "geotrellis-spark-etl" % "1.0.0",
@@ -58,4 +58,5 @@ libraryDependencies ++= Seq(
 fork in Test := true
 parallelExecution in Test := false
 
-javaOptions in Test += "-Djava.library.path=\"" + Environment.javaLibraryPath + "\""
+javaOptions in Test += "-Djava.library.path=" + Environment.javaLibraryPath
+javaOptions in Compile += "-Djava.library.path=" + Environment.javaLibraryPath
