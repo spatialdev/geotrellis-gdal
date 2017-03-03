@@ -58,5 +58,4 @@ libraryDependencies ++= Seq(
 fork in Test := true
 parallelExecution in Test := false
 
-javaOptions in Test += "-Djava.library.path=" + Environment.javaLibraryPath
-javaOptions in Compile += "-Djava.library.path=" + Environment.javaLibraryPath
+javaOptions += "-Djava.library.path=" + Environment.javaLibraryPath
